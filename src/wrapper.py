@@ -5,20 +5,40 @@
 # ------------------------------------------------------------------------------
 from __future__ import annotations
 
+from typing import Any
+
 from elasticsearch import Elasticsearch, helpers
 from elastic_transport import ListApiResponse
 
 
 class Index:
+    """Elastic cloud index wrapper object."""
+
     def __init__(self, client: Elasticsearch, name: str):
-        self.client = client
-        self.name = name
+        self.client: Elasticsearch = client
+        self.name: str = name
+        self.exists: bool = client.indices.exists(index=name)
+
+    def create(self, setting: dict[str, Any], mapping: dict[str, Any]) -> None:
+        ...
 
     def get_mapping(self):
         return self.client.indices.get_mapping(index=self.name)
 
     def get_setting(self):
         return self.client.indices.get_settings(index=self.name)
+
+    def refresh(self): ...
+
+    def truncate(self): ...
+
+    def delete(self): ...
+
+    def update(self): ...
+
+    def index(self): ...
+
+    def bulk(self, data: Any, *, updated_by: str): ...
 
 
 class ES:

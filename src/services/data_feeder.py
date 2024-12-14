@@ -16,7 +16,10 @@ load_dotenv()
 
 
 def main():
-    es = ES(cloud_id=os.getenv('ES_CLOUD_ID'), api_key=os.getenv('ES_API_KEY'))
+    es: ES = ES(
+        cloud_id=os.getenv('ES_CLOUD_ID'),
+        api_key=os.getenv('ES_API_KEY'),
+    )
     print(es.client)
 
 
