@@ -7,8 +7,13 @@ from __future__ import annotations
 
 from markitdown import MarkItDown
 
-markitdown = MarkItDown()
-result = markitdown.convert(
-    "../data/source/[CIO Brief] SCG CIO Old sGINII - Documentation.pdf"
-)
-print(result.text_content)
+
+def convert_simple(file: str, target: str) -> None:
+    markitdown = MarkItDown()
+    try:
+        result = markitdown.convert(file)
+        with open(target, mode='w', encoding='utf-8') as f:
+            f.write(result.text_content)
+        print(f"Successfully converted {file} to {target}")
+    except Exception as e:
+        print(f"Error converting {file}: {str(e)}")
