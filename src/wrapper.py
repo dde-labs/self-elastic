@@ -41,12 +41,15 @@ class Index:
     def bulk(self, data: Any, *, updated_by: str): ...
 
 
-class ES:
+class Es:
     def __init__(self, cloud_id: str, api_key: str):
         self.client = Elasticsearch(cloud_id=cloud_id, api_key=api_key)
 
     def cat_health(self, verbose: bool = False) -> ListApiResponse:
-        """Cat the health status on the target elastic cloud service."""
+        """Cat the health status on the target elastic cloud service.
+
+        :rtype: ListApiResponse
+        """
         return self.client.cat.health(format='json', v=verbose)
 
     def indices(self, name: str):

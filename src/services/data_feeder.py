@@ -9,14 +9,14 @@ import os
 
 from dotenv import load_dotenv
 
-from ..wrapper import ES
+from ..wrapper import Es
 
 
 load_dotenv()
 
 
 def main():
-    es: ES = ES(
+    es: Es = Es(
         cloud_id=os.getenv('ES_CLOUD_ID'),
         api_key=os.getenv('ES_API_KEY'),
     )

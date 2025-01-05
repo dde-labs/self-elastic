@@ -4,3 +4,11 @@
 # license information.
 # ------------------------------------------------------------------------------
 from __future__ import annotations
+
+from markitdown import MarkItDown
+
+markitdown = MarkItDown()
+result = markitdown.convert(
+    "../data/source/[CIO Brief] SCG CIO Old sGINII - Documentation.pdf"
+)
+print(result.text_content)

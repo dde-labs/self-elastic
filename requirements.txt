@@ -1,3 +1,9 @@
+# Core
 python-dotenv==1.0.1
 elasticsearch==8.15.1
+
+# Convert module
+markitdown==0.0.1a3
+
+# Test
 pytest==8.3.4
