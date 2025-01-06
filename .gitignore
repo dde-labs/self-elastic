@@ -163,3 +163,4 @@ cython_debug/
 
 # Local data
 data/
+tests/*.json

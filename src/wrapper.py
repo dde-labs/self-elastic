@@ -38,23 +38,25 @@ class Index:
     def get_mapping(
         self, output: str | Path | None = None
     ) -> ObjectApiResponse:
+        """Get mapping"""
         rs = self.client.indices.get_mapping(index=self.name)
         if output is None:
             return rs
 
         with open(output, mode='w', encoding='utf-8') as f:
-            json.dump(rs.body, f)
+            json.dump(rs.body, f, indent=4)
         return rs
 
     def get_setting(
         self, output: str | Path | None = None
     ) -> ObjectApiResponse:
+        """Get setting"""
         rs = self.client.indices.get_settings(index=self.name)
         if output is None:
             return rs
 
         with open(output, mode='w', encoding='utf-8') as f:
-            json.dump(rs.body, f)
+            json.dump(rs.body, f, indent=4)
         return rs
 
     def refresh(self) -> None:
