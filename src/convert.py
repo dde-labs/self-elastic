@@ -9,6 +9,9 @@ from markitdown import MarkItDown
 
 
 def convert_simple(file: str, target: str) -> None:
+    """Convert any file to markdown format with the simple logic that passing
+    file directly to convert method.
+    """
     markitdown = MarkItDown()
     try:
         result = markitdown.convert(file)
