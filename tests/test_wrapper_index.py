@@ -15,3 +15,10 @@ def test_get_setting(es: Es):
     print(type(rs))
     print(rs)
     print(rs.body)
+
+
+def test_count(es: Es):
+    index: Index = es.index(name='home-product')
+    rs: int = index.count()
+    assert rs >= 0
+    assert isinstance(rs, int)

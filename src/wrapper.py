@@ -15,6 +15,7 @@ from elastic_transport import ListApiResponse, ObjectApiResponse
 
 from .exceptions import BulkException
 
+
 class Index:
     """Elastic cloud index interface object."""
 
@@ -26,6 +27,13 @@ class Index:
     def create(self, setting: dict[str, Any], mapping: dict[str, Any]) -> None:
         if self.exists:
             logging.warning("This index already exists.")
+
+    def count(self) -> int:
+        if not self.exists:
+            return 0
+
+        rs: ObjectApiResponse = self.client.count(index=self.name)
+        return rs['count']
 
     def get_mapping(
         self, output: str | Path | None = None
@@ -59,11 +67,11 @@ class Index:
         if auto_refresh:
             self.refresh()
 
-    def delete(self): ...
+    def delete(self, query: Any, script: Any): ...
 
-    def update(self): ...
+    def update(self, query: Any, script: Any): ...
 
-    def index(self): ...
+    def index(self, _id: str, doc: Any): ...
 
     def bulk(self, actions: Any, request_timeout: int = 60 * 15) -> int:
         success, failed = helpers.bulk(
