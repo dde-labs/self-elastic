@@ -1,6 +1,8 @@
 from src.convert import convert_simple
+from memory_profiler import profile
 
 
+@profile
 def test_convert_simple_pdf():
     convert_simple(
         file=(

@@ -1,4 +1,6 @@
 from pathlib import Path
+from pprint import pprint
+from typing import Any
 
 from src.wrapper import Es, Index
 
@@ -34,3 +36,24 @@ def test_count(es: Es):
     rs: int = index.count()
     assert rs >= 0
     assert isinstance(rs, int)
+
+
+def test_search_by_query(es: Es):
+    index: Index = es.index(name='home-product')
+    rs = index.search_by_query(
+        query={"bool": {"filter": {"term": {"cms_id": "307720"}}}}
+    )
+    hits: list[Any] = rs.body['hits']['hits']
+    for hit in hits:
+        body = {
+            k: hit['_source'][k]
+            for k in hit['_source']
+            if (
+                any(
+                    k.startswith(_)
+                    for _ in ('weight', 'width', 'length', 'height')
+                )
+            )
+        }
+        pprint(body, indent=2)
+        print('-' * 100)

@@ -69,6 +69,18 @@ class Index:
         if auto_refresh:
             self.refresh()
 
+    def search_by_query(
+        self,
+        query: dict[str, Any],
+        output: str | Path = None,
+    ) -> ObjectApiResponse:
+        """Search by query"""
+        rs: ObjectApiResponse = self.client.search(index=self.name, query=query)
+        if output:
+            with open(output, mode='w', encoding='utf-8') as f:
+                json.dump(rs.body['hits']['hits'], f)
+        return rs
+
     def delete(self, query: Any, script: Any): ...
 
     def update(self, query: Any, script: Any): ...
