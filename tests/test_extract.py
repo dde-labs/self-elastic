@@ -1,10 +1,12 @@
-from src.convert import convert_simple
+from pathlib import Path
+
+from src.extract import extract_all2markdown
 from memory_profiler import profile
 
 
 @profile
-def test_convert_simple_pdf():
-    convert_simple(
+def test_extract_all2markdown_pdf():
+    extract_all2markdown(
         file=(
             "../data/source/"
             "[CIO Brief] CIO Old sGINII - Documentation.pdf"
@@ -13,8 +15,8 @@ def test_convert_simple_pdf():
     )
 
 
-def test_convert_simple_pptx():
-    convert_simple(
+def test_extract_all2markdown_pptx():
+    extract_all2markdown(
         file=(
             "../data/source/"
             "[BD Requirement] GINII 2.0 V.1.pptx"
@@ -23,8 +25,8 @@ def test_convert_simple_pptx():
     )
 
 
-def test_convert_simple_xlsx():
-    convert_simple(
+def test_extract_all2markdown_xlsx():
+    extract_all2markdown(
         file=(
             "../data/source/"
             "Home Online - Project Management.xlsx"
@@ -33,8 +35,8 @@ def test_convert_simple_xlsx():
     )
 
 
-def test_convert_simple_docx():
-    convert_simple(
+def test_extract_all2markdown_docx():
+    extract_all2markdown(
         file=(
             "../data/source/"
             "Business Objectives of Revamping Data Management Platform.docx"
@@ -43,8 +45,15 @@ def test_convert_simple_docx():
     )
 
 
-def test_convert_simple_png():
-    convert_simple(
+def test_extract_all2markdown_docx_with_image():
+    extract_all2markdown(
+        file="../data/source/DURA ONE V.2_230404.docx",
+        target='../data/target/dura_one_v2_230404.md',
+    )
+
+
+def test_extract_all2markdown_png():
+    extract_all2markdown(
         file="../data/source/ginii_image.png",
         target='../data/target/ginii_image.md',
     )

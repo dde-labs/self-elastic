@@ -16,6 +16,10 @@ from elastic_transport import ListApiResponse, ObjectApiResponse
 from .exceptions import BulkException
 
 
+def extract_exception(exceptions: list[Any]):
+    ...
+
+
 class Index:
     """Elastic cloud index interface object."""
 
@@ -73,9 +77,12 @@ class Index:
         self,
         query: dict[str, Any],
         output: str | Path = None,
+        size: int = 100,
     ) -> ObjectApiResponse:
         """Search by query"""
-        rs: ObjectApiResponse = self.client.search(index=self.name, query=query)
+        rs: ObjectApiResponse = self.client.search(
+            index=self.name, query=query, size=size
+        )
         if output:
             with open(output, mode='w', encoding='utf-8') as f:
                 json.dump(rs.body['hits']['hits'], f)

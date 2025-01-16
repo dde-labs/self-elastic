@@ -57,3 +57,15 @@ def test_search_by_query(es: Es):
         }
         pprint(body, indent=2)
         print('-' * 100)
+
+
+def test_search_by_query_limit(es: Es):
+    index: Index = es.index(name='home-store')
+    rs = index.search_by_query(
+        query={
+            "bool": {"must": [{"match_all": {}}], "must_not": [], "should": []}
+        },
+        size=1,
+    )
+    hits: list[Any] = rs.body['hits']['hits']
+    print(hits)
