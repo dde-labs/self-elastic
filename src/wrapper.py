@@ -13,11 +13,19 @@ from typing import Any
 from elasticsearch import Elasticsearch, helpers
 from elastic_transport import ListApiResponse, ObjectApiResponse
 
-from .exceptions import BulkException
+from .exceptions import ExceptionResult, BulkException, ResourceNotFoundException
 
 
-def extract_exception(exceptions: list[Any]):
-    ...
+def extract_exception(exceptions: dict[str, Any]):
+    """Extract exception result from the bulk load API."""
+    action: str = next(iter(exceptions))
+    rs: ExceptionResult = ExceptionResult(**exceptions[action])
+    if rs.error['type'] == 'resource_not_found_exception':
+        raise ResourceNotFoundException(rs.error['type']['reason'])
+
+    raise BulkException(
+        "It has some error while bulk data to the elastic cloud."
+    )
 
 
 class Index:
@@ -79,7 +87,42 @@ class Index:
         output: str | Path = None,
         size: int = 100,
     ) -> ObjectApiResponse:
-        """Search by query"""
+        """Search by query
+
+        NOTE:
+            It has a lot of keys in the query syntax like `must`, `filter`,
+        `should` that should to know before passing query to the Elastic.
+
+        Compound Filter:
+            - `must` clauses are required (and)
+            - `should` clauses are optional (or)
+
+        ---
+        {
+            "filtered": {
+               "query": {
+                  "match_all": {}
+               },
+               "filter": {
+                  "bool": {
+                     "must": { ....... Cond 1 },
+                     "should": { ....... Cond 2 }
+                  }
+               }
+            }
+        }
+
+        ---
+        {
+            "bool": {
+                 "should": [   // OR
+                    { ...... Cond 1 },
+                    { ...... Cond 2 }
+                 ]
+            }
+        }
+
+        """
         rs: ObjectApiResponse = self.client.search(
             index=self.name, query=query, size=size
         )
@@ -88,7 +131,12 @@ class Index:
                 json.dump(rs.body['hits']['hits'], f)
         return rs
 
-    def delete(self, query: Any, script: Any): ...
+    def delete(self):
+        ...
+
+    def delete_by_query(self, query: Any):
+        rs = self.client.delete_by_query(index=self.name, query=query)
+        return rs
 
     def update(self, query: Any, script: Any): ...
 
@@ -105,9 +153,8 @@ class Index:
             raise_on_error=False,
         )
         if len(failed) > 0:
-            raise BulkException(
-                "It has some error while bulk data to the elastic cloud."
-            )
+            first_fail: dict[str, Any] = failed[0]
+            extract_exception(first_fail)
 
         return success
 

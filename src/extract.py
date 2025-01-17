@@ -11,8 +11,15 @@ from .__types import AnyPathOrNone
 
 
 def extract_all2markdown(file: str, target: AnyPathOrNone = None) -> None:
-    """Extract any file to markdown format with the simple logic that passing
+    """Extract any file to Markdown format with the simple logic that passing
     file directly to convert method.
+
+    :param file: A file path that want to extract to markdown file format.
+    :type file: str
+    :param target: A target file path that want to save the markdown content. If
+        this value does not pass or set to None, it will print the markdown
+        content to the current stdout.
+    :type target: AnyPathOrNone (=None)
     """
     markitdown = MarkItDown()
     try:
