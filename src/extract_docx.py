@@ -7,33 +7,45 @@ from pathlib import Path
 from zipfile import ZipFile
 import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
+from typing import Optional
 
 from .__types import AnyPath
 from .utils import IMAGE_EXT, is_image
 
 
-NSMAP = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+NAMESPACE: dict[str, str] = {
+    'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
+}
 
 
-def qn(tag):
+def qn(tag) -> str:
     """Stands for 'qualified name', a utility function to turn a namespace
-    prefixed tag name into a Clark-notation qualified tag name for lxml. For
-    example, ``qn('p:cSld')`` returns ``'{http://schemas.../main}cSld'``.
+    prefixed tag name into a Clark-notation qualified tag name for lxml.
+
+    Examples:
+
+        >>> qn('m:cSld')
+        '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}cSld'
+
     Source: https://github.com/python-openxml/python-docx/
+
+    :rtype: str
     """
-    prefix, tagroot = tag.split(':')
-    uri = NSMAP[prefix]
-    return f'{{{uri}}}{tagroot}'
+    prefix, tag_root = tag.split(':')
+    uri: str = NAMESPACE[prefix]
+    return f'{{{uri}}}{tag_root}'
 
 
-def xml2text(xml):
-    """
-    A string representing the textual content of this run, with content
+def xml2text(xml) -> str:
+    """A string representing the textual content of this run, with content
     child elements like ``<w:tab/>`` translated to their Python
     equivalent.
+
     Adapted from: https://github.com/python-openxml/python-docx/
+
+    :rtype: str
     """
-    text = u''
+    text: str = ''
     root = ET.fromstring(xml)
     for child in root.iter():
         if child.tag == qn('w:t'):
@@ -84,7 +96,7 @@ def extract_images(filepath, destination) -> tuple[int, int]:
     return file_count, overall_size
 
 
-def extract_xlm_from_docx(file: AnyPath):
+def extract_docx2xlm(file: AnyPath):
     """Extract image from docx file.
 
     refs: http://officeopenxml.com/
@@ -115,47 +127,42 @@ def extract_xlm_from_docx(file: AnyPath):
         print(image.tail)
 
 
-def extract_txt_from_docx(docx, img_dir=None):
-    """
+def extract_docx2txt(docx, img_dir: Optional[str] = None) -> str:
+    """Extract text from docx
     ref: https://github.com/ankushshah89/python-docx2txt
     """
-    text: bytes = u''
+    text: str = ''
 
     # NOTE: Unzip the docx in memory
-    zipf = zipfile.ZipFile(docx)
-    filelist = zipf.namelist()
+    zip_file: ZipFile = zipfile.ZipFile(docx)
+    filelist: list = zip_file.namelist()
 
-    # get header text
-    # there can be 3 header files in the zip
-    header_xmls = r'word/header\d*.xml'
-    for fname in filelist:
-        if re.match(header_xmls, fname):
-            text += xml2text(zipf.read(fname))
+    # NOTE: Get header text there can be 3 header files in the zip
+    for filename in filelist:
+        if re.match(r'word/header\d*.xml', filename):
+            text += xml2text(zip_file.read(filename))
 
-    # get main text
-    doc_xml = 'word/document.xml'
-    text += xml2text(zipf.read(doc_xml))
+    # NOTE: Fet main text
+    text += xml2text(zip_file.read('word/document.xml'))
 
-    # get footer text
-    # there can be 3 footer files in the zip
-    footer_xmls = r'word/footer\d*.xml'
-    for fname in filelist:
-        if re.match(footer_xmls, fname):
-            text += xml2text(zipf.read(fname))
+    # NOTE: Get footer text there can be 3 footer files in the zip
+    for filename in filelist:
+        if re.match(r'word/footer\d*.xml', filename):
+            text += xml2text(zip_file.read(filename))
 
     if img_dir is not None:
-        # extract images
-        for fname in filelist:
 
-            _, extension = os.path.splitext(fname)
+        for filename in filelist:
+
+            _, extension = os.path.splitext(filename)
 
             if extension.lstrip(r'.') in IMAGE_EXT:
 
-                dst_fname = os.path.join(img_dir, os.path.basename(fname))
+                dst_filename = os.path.join(img_dir, os.path.basename(filename))
 
-                with open(dst_fname, "wb") as dst_f:
-                    dst_f.write(zipf.read(fname))
+                with open(dst_filename, "wb") as dst_f:
+                    dst_f.write(zip_file.read(filename))
 
-    zipf.close()
+    zip_file.close()
 
     return text.strip()
