@@ -134,8 +134,14 @@ class Index:
     def delete(self):
         ...
 
-    def delete_by_query(self, query: Any):
-        rs = self.client.delete_by_query(index=self.name, query=query)
+    def delete_by_query(self, query: Any) -> ObjectApiResponse:
+        """Delete document that match with an input query.
+
+        :rtype: ObjectApiResponse
+        """
+        rs: ObjectApiResponse = self.client.delete_by_query(
+            index=self.name, query=query
+        )
         return rs
 
     def update(self, query: Any, script: Any): ...

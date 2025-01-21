@@ -69,3 +69,13 @@ def test_search_by_query_limit(es: Es):
     )
     hits: list[Any] = rs.body['hits']['hits']
     print(hits)
+
+
+def test_delete_by_query(es: Es):
+    index: Index = es.index(name='home-product')
+    rs = index.search_by_query(query={"match": {"barcode": "8852402136755"}})
+    total: dict = rs['hits']['total']
+
+    if total['value'] == 1:
+        rs = index.delete_by_query(query={"match": {"barcode": "8852402136755"}})
+        assert rs['deleted'] == 1

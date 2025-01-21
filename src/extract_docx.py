@@ -48,13 +48,19 @@ def xml2text(xml) -> str:
     text: str = ''
     root = ET.fromstring(xml)
     for child in root.iter():
+
+        # NOTE: Text
         if child.tag == qn('w:t'):
             t_text = child.text
             text += t_text if t_text is not None else ''
+
+        # NOTE: Tab
         elif child.tag == qn('w:tab'):
             text += '\t'
+
         elif child.tag in (qn('w:br'), qn('w:cr')):
             text += '\n'
+
         elif child.tag == qn("w:p"):
             text += '\n\n'
     return text
@@ -129,6 +135,7 @@ def extract_docx2xlm(file: AnyPath):
 
 def extract_docx2txt(docx, img_dir: Optional[str] = None) -> str:
     """Extract text from docx
+
     ref: https://github.com/ankushshah89/python-docx2txt
     """
     text: str = ''
