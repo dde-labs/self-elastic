@@ -13,7 +13,7 @@ from .__types import AnyPath
 from .utils import IMAGE_EXT, is_image
 
 
-NAMESPACE: dict[str, str] = {
+NAMESPACE_MAP: dict[str, str] = {
     'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
 }
 
@@ -32,7 +32,7 @@ def qn(tag) -> str:
     :rtype: str
     """
     prefix, tag_root = tag.split(':')
-    uri: str = NAMESPACE[prefix]
+    uri: str = NAMESPACE_MAP[prefix]
     return f'{{{uri}}}{tag_root}'
 
 
@@ -58,15 +58,18 @@ def xml2text(xml) -> str:
         elif child.tag == qn('w:tab'):
             text += '\t'
 
+        # NOTE: Newline
         elif child.tag in (qn('w:br'), qn('w:cr')):
             text += '\n'
 
+        # NOTE: Page
         elif child.tag == qn("w:p"):
             text += '\n\n'
+
     return text
 
 
-def extract_images(filepath, destination) -> tuple[int, int]:
+def extract_docx2images(filepath, destination) -> tuple[int, int]:
     """Extract images from a docx file format."""
 
     overall_size: int = 0
@@ -112,25 +115,25 @@ def extract_docx2xlm(file: AnyPath):
         tree = ET.XML(docx.read('word/document.xml'))
         # print(tree)
 
-    TEXT = qn('w:t')
-    TABLE = qn('w:tbl')
-    ROW = qn('w:tr')
-    CELL = qn('w:tc')
+    text = qn('w:t')
+    table = qn('w:tbl')
+    row = qn('w:tr')
+    cell = qn('w:tc')
 
-    for table in tree.iter(TABLE):
-        for row in table.iter(ROW):
-            for cell in row.iter(CELL):
-                print(''.join(node.text for node in cell.iter(TEXT)))
+    for table in tree.iter(table):
+        for row in table.iter(row):
+            for cell in row.iter(cell):
+                print(''.join(node.text for node in cell.iter(text)))
 
-    IMAGE: str = qn('w:docPr')
+    image: str = qn('w:docPr')
 
-    image: Element
-    for image in tree.iter(IMAGE):
-        print(image.attrib)
-        print(image.items())
-        print(image.text)
-        print(image.tag)
-        print(image.tail)
+    img: Element
+    for img in tree.iter(image):
+        print(img.attrib)
+        print(img.items())
+        print(img.text)
+        print(img.tag)
+        print(img.tail)
 
 
 def extract_docx2txt(docx, img_dir: Optional[str] = None) -> str:
