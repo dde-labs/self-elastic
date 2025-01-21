@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -116,6 +117,11 @@ class Index:
 
         return rs
 
+    def get_id(self, _id: str) -> ObjectApiResponse:
+        """Get document with specific document ID."""
+        rs: ObjectApiResponse = self.client.get(index=self.name, id=_id)
+        return rs
+
     def search_by_query(
         self,
         query: dict[str, Any],
@@ -156,9 +162,40 @@ class Index:
         )
         return rs
 
-    def update(self, query: Any, script: Any): ...
+    def mark_delete(self, src: str, dt: datetime):
+        """Mark delete flag on this index documents that match with source
+        system name and have updated date more than an dt value.
+        """
+        return self.client.update_by_query(
+            index=self.name,
+            script={
+                "source": """
+                    if (ctx._source.get('@deleted') != null) {
+                        ctx._source.remove('@deleted');
+                        ctx._source.put('@deleted', true);
+                    } else {
+                        ctx._source.put('@deleted', true);
+                    }
+                """,
+                # "source": "ctx._source.put('@deleted', true)",
+                "lang": "painless"
+            },
+            query={
+                "bool": {
+                    "filter": [
+                        {"term": {"@src_name": src}},
+                        {"range": {"@upload_date": {"gte": f'{dt:%Y-%m-%d}'}}},
+                    ]
+                }
+            },
+        )
 
-    def index(self, _id: str, doc: Any): ...
+    def index(self, _id: str, doc: Any):
+        return self.client.index(
+            index=self.name,
+            id=_id,
+            document=doc,
+        )
 
     def bulk(self, actions: Any, request_timeout: int = 60 * 15) -> int:
         """Bulk load data to this index.
@@ -174,6 +211,7 @@ class Index:
             raise_on_exception=False,
             raise_on_error=False,
         )
+
         if len(failed) > 0:
 
             # NOTE: Get the first exception.

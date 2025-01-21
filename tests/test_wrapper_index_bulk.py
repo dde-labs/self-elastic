@@ -4,16 +4,7 @@ import pytest
 
 from src.wrapper import Es, Index
 from src.exceptions import DocumentParsingException
-
-
-def actions(index_name: str, data: list[dict[str, Any]]):
-    for d in data:
-        yield {
-            "_op_type": "index",
-            "_index": index_name,
-            "_id": d.pop('es_id'),
-            **d,
-        }
+from src.utils import actions
 
 
 def test_bulk(es: Es):
@@ -33,7 +24,33 @@ def test_bulk(es: Es):
             ]
         )
     )
-    print(rs)
+    assert rs == 1
+
+
+def test_bulk_upsert(es: Es):
+    index: Index = es.index("tmp-korawica-home-product")
+    rs: int = index.bulk(
+        actions=actions(
+            index.name,
+            data=[
+                {
+                    'es_id': '1',
+                    'barcode': '10001',
+                    'cms_id': 'cms10001',
+                    'height_number': 5,
+                    'article_id': 1,
+                    'upload_date': '2025-01-02',
+                    '@updated': True,
+                },
+            ]
+        )
+    )
+    assert rs == 1
+
+    rs_get = index.get_id('1')
+
+    assert rs_get['_version'] > 1
+    assert rs_get['_source']['height_number'] == 5
 
 
 def test_bulk_raise_data_type(es: Es):
