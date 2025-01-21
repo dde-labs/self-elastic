@@ -14,19 +14,24 @@ from elasticsearch import Elasticsearch, helpers
 from elastic_transport import ListApiResponse, ObjectApiResponse
 
 from .exceptions import (
-    ExceptionResult, BulkException, ResourceNotFoundException, IndexExists
+    ExceptionResult, BulkException, ResourceNotFoundException, IndexExists,
+    DocumentParsingException
 )
 
 
-def extract_exception(exceptions: dict[str, Any]):
+def extract_exception(exceptions: dict[str, Any]) -> None:
     """Extract exception result from the bulk load API."""
     action: str = next(iter(exceptions))
     rs: ExceptionResult = ExceptionResult(**exceptions[action])
+
     if rs.error['type'] == 'resource_not_found_exception':
-        raise ResourceNotFoundException(rs.error['type']['reason'])
+        raise ResourceNotFoundException(rs.error['reason'])
+
+    elif rs.error['type'] == 'document_parsing_exception':
+        raise DocumentParsingException(rs.error['reason'])
 
     raise BulkException(
-        "It has some error while bulk data to the elastic cloud."
+        f"It has some error while bulk data to the elastic cloud: {exceptions}."
     )
 
 
@@ -60,6 +65,9 @@ class Index:
         return rs
 
     def count(self) -> int:
+        """Return the document count from this index. It will return 0 if this
+        index does not exist in the target Elastic.
+        """
         if not self.exists:
             return 0
 
@@ -153,6 +161,10 @@ class Index:
     def index(self, _id: str, doc: Any): ...
 
     def bulk(self, actions: Any, request_timeout: int = 60 * 15) -> int:
+        """Bulk load data to this index.
+
+        :rtype: int
+        """
         success, failed = helpers.bulk(
             self.client.options(
                 request_timeout=request_timeout,
@@ -163,6 +175,8 @@ class Index:
             raise_on_error=False,
         )
         if len(failed) > 0:
+
+            # NOTE: Get the first exception.
             first_fail: dict[str, Any] = failed[0]
             extract_exception(first_fail)
 

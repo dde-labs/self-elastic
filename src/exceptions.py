@@ -1,3 +1,8 @@
+# ------------------------------------------------------------------------------
+# Copyright (c) 2022 Korawich Anuttra. All rights reserved.
+# Licensed under the MIT License. See LICENSE in the project root for
+# license information.
+# ------------------------------------------------------------------------------
 from dataclasses import dataclass
 from typing import Any
 
@@ -13,13 +18,13 @@ class ExceptionResult:
 class IndexExists(FileExistsError): ...
 
 
-class BulkException(Exception):
+class BulkException(Exception): ...
 
-    def __init__(self, *args, raw: dict[str, Any] = None, **kwargs):
-        self._raw = raw
-        super().__init__(*args, **kwargs)
 
 class RateLimitException(BulkException): ...
 
 
 class ResourceNotFoundException(BulkException): ...
+
+
+class DocumentParsingException(BulkException): ...

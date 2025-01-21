@@ -42,9 +42,96 @@ def test_exception_result_404():
                         "reason": (
                             "Inference id [cap-text-embedding-3-small-chunk50] not found for field [short_description]"
                         ),
-                    }
+                    },
                 ],
             },
         }
     )
     print(except_rs)
+
+
+def test_exception_result_400():
+    except_rs = ExceptionResult(
+        **{
+            '_index': 'tmp-korawica-home-product',
+            '_id': '1',
+            'status': 400,
+            'error': {
+                'type': 'document_parsing_exception',
+                'reason': "[1:56] failed to parse field [height_number] of type [float] in document with id '1'. Preview of field's value: 'very height'",
+                'caused_by': {
+                    'type': 'number_format_exception',
+                    'reason': 'For input string: "very height"'
+                },
+            },
+        },
+    )
+    print(except_rs)
+
+
+def test_exception_result_400():
+    # [
+    #     {
+    #         'index': {
+    #             'error': "BadRequestError(400, 'action_request_validation_exception', 'Validation Failed: 1: index is missing;')",
+    #             'status': 400,
+    #             'exception': BadRequestError(
+    #                 'action_request_validation_exception',
+    #                 meta=ApiResponseMeta(
+    #                 status=400,
+    #                 http_version='1.1',
+    #                 headers={
+    #                     'Content-Encoding': 'gzip',
+    #                     'Content-Length': '144',
+    #                     'Content-Type': 'application/vnd.elasticsearch+json;compatible-with=8',
+    #                     'X-Cloud-Request-Id': 'me-H5pdeQDSHfTMzk-Q_uA',
+    #                     'X-Elastic-Product': 'Elasticsearch',
+    #                     'X-Found-Handling-Cluster': '17afea6b4e0b41f096fe89e66ff54a1c',
+    #                     'X-Found-Handling-Instance': 'instance-0000000002',
+    #                     'Date': 'Tue, 21 Jan 2025 11:45:10 GMT'},
+    #                 duration=0.03972673416137695,
+    #                 node=NodeConfig(
+    #                     scheme='https',
+    #                     host='17afea6b4e0b41f096fe89e66ff54a1c.ap-southeast-1.aws.found.io',
+    #                     port=443,
+    #                     path_prefix='',
+    #                     headers={
+    #                         'user-agent': 'elasticsearch-py/8.15.1 (Python/3.11.9; elastic-transport/8.15.1)'},
+    #                     connections_per_node=10,
+    #                     request_timeout=10.0,
+    #                     http_compress=True,
+    #                     verify_certs=True,
+    #                     ca_certs=None,
+    #                     client_cert=None,
+    #                     client_key=None,
+    #                     ssl_assert_hostname=None,
+    #                     ssl_assert_fingerprint=None,
+    #                     ssl_version=None,
+    #                     ssl_context=None,
+    #                     ssl_show_warn=True,
+    #                     _extras={})),
+    #                     body={
+    #                         'error': {
+    #                             'root_cause': [
+    #                                 {
+    #                                     'type': 'action_request_validation_exception',
+    #                                     'reason': 'Validation Failed: 1: index is missing;'
+    #                                 }
+    #                             ],
+    #                                 'type': 'action_request_validation_exception',
+    #                                 'reason': 'Validation Failed: 1: index is missing;'
+    #                         },
+    #                         'status': 400
+    #                     }
+    #             ),
+    #             'data': {
+    #                 'index': 'tmp-korawica-home-product',
+    #                 'barcode': '10001',
+    #                 'cms_id': 'cms10001', 'height_number': 1.12, 'article_id': 1,
+    #                 'upload_date': '2025-01-01'
+    #             },
+    #             '_id': '1'
+    #         }
+    #     }
+    # ]
+    ...
