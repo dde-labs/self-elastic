@@ -6,13 +6,13 @@ from src.wrapper import Es, Index
 
 
 def test_get_mapping(es: Es, test_path: Path):
-    index: Index = es.index(name='home-product')
+    index: Index = es.index(name='home-store')
     rs = index.get_mapping()
     print(type(rs))
     print(rs)
     print(rs.body)
 
-    test_file: Path = test_path / 'test_mapping_home_product.json'
+    test_file: Path = test_path / 'test-mapping-home-store.json'
     index.get_mapping(output=test_file)
 
     # test_file.unlink(missing_ok=True)
@@ -29,6 +29,10 @@ def test_get_setting(es: Es, test_path: Path):
     index.get_setting(output=test_file)
 
     # test_file.unlink(missing_ok=True)
+
+
+def test_create_index(es: Es):
+    index: Index = es.index(name='tmp-korawica-home-product')
 
 
 def test_count(es: Es):
