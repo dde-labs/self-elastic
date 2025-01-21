@@ -13,7 +13,9 @@ from typing import Any
 from elasticsearch import Elasticsearch, helpers
 from elastic_transport import ListApiResponse, ObjectApiResponse
 
-from .exceptions import ExceptionResult, BulkException, ResourceNotFoundException
+from .exceptions import (
+    ExceptionResult, BulkException, ResourceNotFoundException, IndexExists
+)
 
 
 def extract_exception(exceptions: dict[str, Any]):
@@ -36,9 +38,26 @@ class Index:
         self.name: str = name
         self.exists: bool = client.indices.exists(index=name)
 
-    def create(self, setting: dict[str, Any], mapping: dict[str, Any]) -> None:
+    def create(
+        self,
+        mapping: dict[str, Any],
+        setting: dict[str, Any] | None = None,
+        force_create: bool = False,
+    ) -> ObjectApiResponse:
+        """Create index with mapping and setting values."""
         if self.exists:
             logging.warning("This index already exists.")
+            if not force_create:
+                raise IndexExists(f"The {self.name} index already exists.")
+
+            self.client.indices.delete(index=self.name)
+
+        rs: ObjectApiResponse = self.client.indices.create(
+            index=self.name,
+            mappings=mapping,
+            settings=setting or {},
+        )
+        return rs
 
     def count(self) -> int:
         if not self.exists:
@@ -72,14 +91,22 @@ class Index:
         return rs
 
     def refresh(self) -> None:
+        """Refresh this index."""
         self.client.indices.refresh(index=self.name)
 
-    def truncate(self, auto_refresh: bool = True):
-        rs = self.client.delete_by_query(
+    def truncate(self, auto_refresh: bool = True) -> ObjectApiResponse:
+        """Truncate data in this index and then refresh it or not with passing
+        an input refresh flag.
+        """
+        rs: ObjectApiResponse = self.client.delete_by_query(
             index=self.name, query={"match_all": {}}
         )
+
         if auto_refresh:
+            print("Already refresh index after delete all documents.")
             self.refresh()
+
+        return rs
 
     def search_by_query(
         self,
@@ -87,7 +114,11 @@ class Index:
         output: str | Path = None,
         size: int = 100,
     ) -> ObjectApiResponse:
-        """Search by query
+        """Search by query.
+
+        :param query:
+        :param output:
+        :param size:
 
         NOTE:
             It has a lot of keys in the query syntax like `must`, `filter`,
@@ -96,32 +127,6 @@ class Index:
         Compound Filter:
             - `must` clauses are required (and)
             - `should` clauses are optional (or)
-
-        ---
-        {
-            "filtered": {
-               "query": {
-                  "match_all": {}
-               },
-               "filter": {
-                  "bool": {
-                     "must": { ....... Cond 1 },
-                     "should": { ....... Cond 2 }
-                  }
-               }
-            }
-        }
-
-        ---
-        {
-            "bool": {
-                 "should": [   // OR
-                    { ...... Cond 1 },
-                    { ...... Cond 2 }
-                 ]
-            }
-        }
-
         """
         rs: ObjectApiResponse = self.client.search(
             index=self.name, query=query, size=size
@@ -131,8 +136,7 @@ class Index:
                 json.dump(rs.body['hits']['hits'], f)
         return rs
 
-    def delete(self):
-        ...
+    def delete(self): ...
 
     def delete_by_query(self, query: Any) -> ObjectApiResponse:
         """Delete document that match with an input query.

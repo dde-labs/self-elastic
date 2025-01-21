@@ -33,6 +33,29 @@ def test_get_setting(es: Es, test_path: Path):
 
 def test_create_index(es: Es):
     index: Index = es.index(name='tmp-korawica-home-product')
+    assert not index.exists
+
+    rs = index.create(
+        setting={
+            "number_of_shards": 1,
+            "number_of_replicas": 0
+        },
+        mapping={
+            "properties": {
+                "barcode": {"type": "keyword"},
+                "brand": {"type": "text", "analyzer": "icu_analyzer"},
+                "cms_id": {"type": "keyword"},
+                "height_number": {"type": "float"},
+                "article_id": {"type": "integer"},
+                "upload_date": {"type": "date"},
+            }
+        }
+    )
+    assert rs.body == {
+        'acknowledged': True,
+        'shards_acknowledged': True,
+        'index': 'tmp-korawica-home-product',
+    }
 
 
 def test_count(es: Es):
@@ -40,6 +63,13 @@ def test_count(es: Es):
     rs: int = index.count()
     assert rs >= 0
     assert isinstance(rs, int)
+
+
+def test_truncate(es: Es):
+    index: Index = es.index('tmp-korawica-home-product')
+    rs = index.truncate(auto_refresh=True)
+    print(type(rs))
+    print(rs)
 
 
 def test_search_by_query(es: Es):
