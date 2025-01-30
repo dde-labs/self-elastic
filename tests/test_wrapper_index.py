@@ -58,9 +58,11 @@ def test_create_index(es: Es):
 
 def test_count(es: Es):
     index: Index = es.index(name='home-product')
+    # index: Index = es.index(name='home-solution')
     rs: int = index.count()
     assert rs >= 0
     assert isinstance(rs, int)
+    print(rs)
 
 
 def test_truncate(es: Es):
@@ -91,6 +93,32 @@ def test_search_by_query(es: Es):
         print('-' * 100)
 
 
+def test_search_by_query_multi_condition(es: Es):
+    index: Index = es.index(name='home-product')
+    rs = index.search_by_query(
+        query={"bool": {"filter":
+            [
+                {"term": {"@upload_prcs_nm": "P_CAP_ES_HOME_PRODUCT_D_10"}},
+                {"range": {"@upload_date": {"gte": "2025-01-27"}}},
+            ]
+        }}
+    )
+    hits: list[Any] = rs.body['hits']['hits']
+    for hit in hits:
+        body = {
+            k: hit['_source'][k]
+            for k in hit['_source']
+            if (
+                any(
+                    k.startswith(_)
+                    for _ in ('@upload_prcs_nm', '@upload_date', 'cmd_id')
+                )
+            )
+        }
+        pprint(body, indent=2)
+        print('-' * 100)
+
+
 def test_search_by_query_limit(es: Es):
     index: Index = es.index(name='home-store')
     rs = index.search_by_query(
@@ -111,3 +139,9 @@ def test_delete_by_query(es: Es):
     if total['value'] == 1:
         rs = index.delete_by_query(query={"match": {"barcode": "8852402136755"}})
         assert rs['deleted'] == 1
+
+
+def test_get_id(es: Es):
+    index: Index = es.index(name='home-solution')
+    rs = index.get_id('2f06e2ffc54234439bbed00ce84d265a')
+    print(rs)

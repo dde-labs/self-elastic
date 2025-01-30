@@ -78,12 +78,13 @@ class Index:
     def get_mapping(
         self, output: str | Path | None = None
     ) -> ObjectApiResponse:
-        """Get mapping"""
+        """Get mapping of this index."""
         rs = self.client.indices.get_mapping(index=self.name)
         if output is None:
             return rs
 
         with open(output, mode='w', encoding='utf-8') as f:
+            # noinspection PyTypeChecker
             json.dump(rs.body, f, indent=4)
         return rs
 
@@ -96,6 +97,7 @@ class Index:
             return rs
 
         with open(output, mode='w', encoding='utf-8') as f:
+            # noinspection PyTypeChecker
             json.dump(rs.body, f, indent=4)
         return rs
 
@@ -147,6 +149,7 @@ class Index:
         )
         if output:
             with open(output, mode='w', encoding='utf-8') as f:
+                # noinspection PyTypeChecker
                 json.dump(rs.body['hits']['hits'], f)
         return rs
 
