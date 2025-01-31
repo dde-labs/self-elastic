@@ -125,7 +125,33 @@ def test_search_by_query_limit(es: Es):
         query={
             "bool": {"must": [{"match_all": {}}], "must_not": [], "should": []}
         },
-        size=1,
+        size=33,
+    )
+    hits: list[Any] = rs.body['hits']['hits']
+    print(hits)
+
+
+def test_search_by_query_not_match(es: Es):
+    index: Index = es.index(name='home-store')
+    rs = index.search_by_query(
+        query={
+            "bool": {
+                "must_not": [
+                    {
+                        "bool": {"filter":
+                            [
+                                {"term": {"@upload_prcs_nm": 'P_CAP_ES_HOME_STORE_D_10'}},
+                                {"range": {"@upload_date": {
+                                    "gte": '2025-01-31',
+                                    "lte": '2025-01-31',
+                                    "format": "yyyy-MM-dd"
+                                }}},
+                            ],
+                        },
+                    }
+                ]
+            }
+        }
     )
     hits: list[Any] = rs.body['hits']['hits']
     print(hits)

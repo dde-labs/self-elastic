@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from src.wrapper import Es
 
 
-load_dotenv('../.env')
+load_dotenv(Path(__file__).parent.parent / '.env')
 
 
 @pytest.fixture(scope='session')

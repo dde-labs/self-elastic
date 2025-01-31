@@ -1,0 +1,7 @@
+azure-core==1.32.0
+azure-identity==1.19.0
+deltalake==0.24.0
+
+# PyArrow >= 19.0.0 raise Repetition level histogram size mismatch
+# Refs: https://github.com/apache/arrow/issues/45283
+pyarrow<19.0.0
