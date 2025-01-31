@@ -195,6 +195,7 @@ def dump_delta_to_es(es: Es, metadata: Metadata):
 
                 if (num_failed := len(failed)) > 0:
                     print(failed)
+                    break
 
                 failed_total += num_failed
 

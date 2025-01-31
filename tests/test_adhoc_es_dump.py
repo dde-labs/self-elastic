@@ -1,3 +1,10 @@
+"""
+Example for running single test.
+
+```shell
+$ pytest -vv tests/test_adhoc_es_dump.py::test_es_dump_home_product
+```
+"""
 import os
 from pathlib import Path
 from datetime import datetime
@@ -43,6 +50,7 @@ def test_es_dump_home_product(es: Es, test_path: Path, st_name: str, container: 
             index_nm='home-product',
             asat_dt=f"{datetime.now():%Y%m%d}",
             prcess_nm="P_CAP_ES_HOME_PRODUCT_D_10",
+            limit_workers=2,
         )
     )
 
@@ -78,6 +86,112 @@ def test_es_dump_home_store(es: Es, test_path: Path, st_name: str, container: st
     )
 
     index = es.index('home-store')
+    index.refresh()
+
+    rows: int = index.count()
+    print(rows)
+
+
+def test_es_dump_home_solution(es: Es, test_path: Path, st_name: str, container: str):
+    dest_name: str = 'home_solution'
+    index_name: str = 'home-solution'
+
+    dest: Path = test_path.parent / f'data/dump/{datetime.now():%Y%m%d}'
+    if dest.exists():
+        dest.mkdir(exist_ok=True)
+
+    try:
+        DeltaTable(str(dest / dest_name))
+    except TableNotFoundError:
+        extract_delta_from_az(
+            container=container,
+            name=dest_name,
+            st_name=st_name,
+            dest=dest / dest_name
+        )
+
+    dump_delta_to_es(
+        es=es, metadata=Metadata(
+            source=str(dest / dest_name),
+            index_nm=index_name,
+            asat_dt=f"{datetime.now():%Y%m%d}",
+            prcess_nm="P_CAP_ES_HOME_SOLUTION_D_10",
+            limit_workers=3,
+        )
+    )
+
+    index = es.index(index_name)
+    index.refresh()
+
+    rows: int = index.count()
+    print(rows)
+
+
+def test_es_dump_home_solution_provider(es: Es, test_path: Path, st_name: str, container: str):
+    dest_name: str = 'home_solution_provider'
+    index_name: str = 'home-solution-provider'
+
+    dest: Path = test_path.parent / f'data/dump/{datetime.now():%Y%m%d}'
+    if dest.exists():
+        dest.mkdir(exist_ok=True)
+
+    try:
+        DeltaTable(str(dest / dest_name))
+    except TableNotFoundError:
+        extract_delta_from_az(
+            container=container,
+            name=dest_name,
+            st_name=st_name,
+            dest=dest / dest_name
+        )
+
+    dump_delta_to_es(
+        es=es, metadata=Metadata(
+            source=str(dest / dest_name),
+            index_nm=index_name,
+            asat_dt=f"{datetime.now():%Y%m%d}",
+            prcess_nm="P_CAP_ES_HOME_SOLUTION_PROVIDER_D_10",
+            limit_workers=3,
+        )
+    )
+
+    index = es.index(index_name)
+    index.refresh()
+
+    rows: int = index.count()
+    print(rows)
+
+
+def test_es_dump_home_content_article(es: Es, test_path: Path, st_name: str, container: str):
+    dest_name: str = 'home_content_article'
+    index_name: str = 'home-content-article'
+
+    dest: Path = test_path.parent / f'data/dump/{datetime.now():%Y%m%d}'
+    if dest.exists():
+        dest.mkdir(exist_ok=True)
+
+    try:
+        DeltaTable(str(dest / dest_name))
+    except TableNotFoundError:
+        extract_delta_from_az(
+            container=container,
+            name=dest_name,
+            st_name=st_name,
+            dest=dest / dest_name
+        )
+
+    dump_delta_to_es(
+        es=es, metadata=Metadata(
+            source=str(dest / dest_name),
+            index_nm=index_name,
+            asat_dt=f"{datetime.now():%Y%m%d}",
+            prcess_nm="P_CAP_ES_HOME_CONTENT_ARTICLE_D_10",
+            limit_rows=300,
+            limit_slice_rows=50,
+        )
+    )
+
+    index = es.index(index_name)
     index.refresh()
 
     rows: int = index.count()
