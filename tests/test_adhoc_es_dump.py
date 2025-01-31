@@ -2,7 +2,7 @@
 Example for running single test.
 
 ```shell
-$ pytest -vv tests/test_adhoc_es_dump.py::test_es_dump_home_product
+$ pytest -vv tests/test_adhoc_es_dump.py::test_es_dump_home_product -p no:faulthandler
 ```
 """
 import os
@@ -29,6 +29,7 @@ def container() -> str:
 
 
 def test_es_dump_home_product(es: Es, test_path: Path, st_name: str, container: str):
+    """pytest -vv tests/test_adhoc_es_dump.py::test_es_dump_home_product -p no:faulthandler"""
 
     dest: Path = test_path.parent / f'data/dump/{datetime.now():%Y%m%d}'
     if dest.exists():
@@ -62,6 +63,7 @@ def test_es_dump_home_product(es: Es, test_path: Path, st_name: str, container: 
 
 
 def test_es_dump_home_store(es: Es, test_path: Path, st_name: str, container: str):
+    """pytest -vv tests/test_adhoc_es_dump.py::test_es_dump_home_store -p no:faulthandler"""
     dest: Path = test_path.parent / f'data/dump/{datetime.now():%Y%m%d}'
     if dest.exists():
         dest.mkdir(exist_ok=True)
@@ -93,6 +95,7 @@ def test_es_dump_home_store(es: Es, test_path: Path, st_name: str, container: st
 
 
 def test_es_dump_home_solution(es: Es, test_path: Path, st_name: str, container: str):
+    """pytest -vv tests/test_adhoc_es_dump.py::test_es_dump_home_solution -p no:faulthandler"""
     dest_name: str = 'home_solution'
     index_name: str = 'home-solution'
 
@@ -128,6 +131,7 @@ def test_es_dump_home_solution(es: Es, test_path: Path, st_name: str, container:
 
 
 def test_es_dump_home_solution_provider(es: Es, test_path: Path, st_name: str, container: str):
+    """pytest -vv tests/test_adhoc_es_dump.py::test_es_dump_home_solution_provider -p no:faulthandler"""
     dest_name: str = 'home_solution_provider'
     index_name: str = 'home-solution-provider'
 
@@ -163,6 +167,8 @@ def test_es_dump_home_solution_provider(es: Es, test_path: Path, st_name: str, c
 
 
 def test_es_dump_home_content_article(es: Es, test_path: Path, st_name: str, container: str):
+    """pytest -vv -s ./tests/test_adhoc_es_dump.py::test_es_dump_home_content_article
+    """
     dest_name: str = 'home_content_article'
     index_name: str = 'home-content-article'
 

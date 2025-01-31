@@ -203,6 +203,8 @@ def dump_delta_to_es(es: Es, metadata: Metadata):
 
     # NOTE: Remove all data that does not dump
     index: Index = es.index(name=metadata.index_nm)
+    index.refresh()
+
     rs = index.search_by_query(
         query={
             "bool": {
@@ -222,6 +224,32 @@ def dump_delta_to_es(es: Es, metadata: Metadata):
                 ],
             },
         },
+        size=1000,
     )
     hits: list[Any] = rs.body['hits']['hits']
-    print(len(hits))
+    records: int = len(hits)
+    print(records)
+    if records > 0 and records != success_total:
+        print("Start delete doc that is not exists on the production.")
+        rs = index.delete_by_query(
+            query={
+                "bool": {
+                    "must_not": [
+                        {
+                            "bool": {"filter":
+                                [
+                                    {"term": {
+                                        "@upload_prcs_nm": metadata.prcess_nm}},
+                                    {"range": {"@upload_date": {
+                                        "gte": metadata.asat_dt_dash,
+                                        "lte": metadata.asat_dt_dash,
+                                        "format": "yyyy-MM-dd"
+                                    }}},
+                                ],
+                            },
+                        },
+                    ],
+                },
+            },
+        )
+        print("Delete docs successful with:", rs['deleted'])

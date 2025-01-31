@@ -128,7 +128,7 @@ class Index:
         self,
         query: dict[str, Any],
         output: str | Path = None,
-        size: int = 100,
+        size: int = 1000,
     ) -> ObjectApiResponse:
         """Search by query.
 
