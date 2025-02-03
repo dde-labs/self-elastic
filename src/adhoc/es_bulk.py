@@ -3,48 +3,16 @@
 # Licensed under the MIT License. See LICENSE in the project root for
 # license information.
 # ------------------------------------------------------------------------------
-import os
 import time
 from uuid import uuid4
-from datetime import datetime
 from concurrent.futures import ThreadPoolExecutor, Future, as_completed
 
 import polars as pl
-from dotenv import load_dotenv
 from elasticsearch import Elasticsearch, helpers
 from elastic_transport import TlsError
-from zoneinfo import ZoneInfo
 
-
-load_dotenv('../.env')
-
-# NOTE: Connection config
-CLOUD_ID: str = os.getenv('ES_CLOUD_ID')
-API_KEY: str = os.getenv('ES_API_KEY')
-
-# NOTE: Function Config
-LIMIT_ROWS: int = 750
-LIMIT_WORKERS: int = 1
-LIMIT_SLICE_ROWS: int = 250
-
-# NOTE: Data Config
-DATA_NAME: str = "home-content-article"
-INDEX_NAME: str = "home-content-article"
-PRCS_NM: str = "P_CAP_ES_HOME_CONTENT_ARTICLE_D_10"
-ASAT_DT: str = "20241117"
-ASAT_DT_DASH: str = "2024-11-17"
-DEFAULT_DT: datetime = datetime(1990, 1, 1, tzinfo=ZoneInfo('UTC'))
-FRAMEWORK_SCD_COLS: tuple[str, ...] = (
-    'start_dt',
-    'end_dt',
-    'delete_f',
-    'prcs_nm',
-    'prcs_ld_id',
-    'asat_dt',
-    'updt_prcs_nm',
-    'updt_prcs_ld_id',
-    'updt_asat_dt',
-)
+from .__conf import FRAMEWORK_SCD1_COLS, DEFAULT_DT, Metadata
+from ..wrapper import Es
 
 
 pl.Config.set_streaming_chunk_size = 1000
@@ -155,25 +123,29 @@ def pl_asat_dt_to_datetime():
     )
 
 
-def scan_delta_local_iter():
-    client = Elasticsearch(cloud_id=CLOUD_ID, api_key=API_KEY)
-
+def scan_delta_to_es(es: Es, metadata: Metadata):
     # NOTE: Extract data from the Delta Table.
     df: pl.LazyFrame = (
-        pl.scan_delta(f'../../data/{DATA_NAME}')
+        pl.scan_delta(metadata.source)
         .select(
-            pl.all().exclude(FRAMEWORK_SCD_COLS).name.map(str.lower),
-            pl.when(
-                pl.col("updt_asat_dt").is_null()
-            ).then(True).otherwise(False).alias("@updated"),
-            pl.concat_list(
-                (
-                    pl_asat_dt_to_datetime(),
-                    pl.coalesce(pl.col("updt_asat_dt"), DEFAULT_DT)
-                ),
-            ).list.max().dt.date().alias("@upload_date"),
-            pl.lit(PRCS_NM).alias("@upload_prcs_nm"),
-            # pl.lit(False).alias("@deleted"),
+            pl.all().exclude(FRAMEWORK_SCD1_COLS).name.map(str.lower),
+            (
+                pl.when(pl.col("updt_asat_dt").is_null())
+                .then(True)
+                .otherwise(False)
+                .alias("@updated")
+            ),
+            (
+                pl.concat_list(
+                    (
+                        pl_asat_dt_to_datetime(),
+                        pl.coalesce(pl.col("updt_asat_dt"), DEFAULT_DT)
+                    ),
+                ).list.max()
+                .dt.date()
+                .alias("@upload_date")
+            ),
+            pl.lit(metadata.prcess_nm).alias("@upload_prcs_nm"),
             (
                 pl.when(pl.col("delete_f") == 1)
                 .then(True)
@@ -181,26 +153,28 @@ def scan_delta_local_iter():
                 .alias("@deleted")
             ),
         )
-        .filter(pl.col('@upload_date') >= pl.lit(ASAT_DT_DASH).str.to_date())
+        .filter(
+            pl.col('@upload_date') >= pl.lit(metadata.asat_dt_dash).str.to_date()
+        )
     )
 
     success_total: int = 0
     failed_total: int = 0
 
-    for parent_df in df.collect(streaming=False).iter_slices(n_rows=LIMIT_ROWS):
+    for parent_df in df.collect(streaming=False).iter_slices(n_rows=metadata.limit_rows):
 
-        with ThreadPoolExecutor(max_workers=LIMIT_WORKERS) as executor:
+        with ThreadPoolExecutor(max_workers=metadata.limit_workers) as executor:
 
             futures: list[Future] = []
 
-            for frame in parent_df.iter_slices(n_rows=LIMIT_SLICE_ROWS):
+            for frame in parent_df.iter_slices(n_rows=metadata.limit_slice_rows):
                 futures.append(
                     executor.submit(
                         bulk_load_task,
                         df=frame,
                         id_col='es_id',
-                        index_name=INDEX_NAME,
-                        client=client,
+                        index_name=metadata.index_nm,
+                        client=es.client,
                     )
                 )
 
@@ -217,7 +191,3 @@ def scan_delta_local_iter():
                 failed_total += num_failed
 
     print(success_total, failed_total)
-
-
-if __name__ == '__main__':
-    scan_delta_local_iter()
