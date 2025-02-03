@@ -65,14 +65,22 @@ class Index:
         )
         return rs
 
-    def count(self) -> int:
+    def rename(self, name: str):
+        self.client.reindex(
+            source={"index": self.name},
+            dest={"index": name},
+        )
+
+    def count(self, query: Any | None = None) -> int:
         """Return the document count from this index. It will return 0 if this
         index does not exist in the target Elastic.
+
+        :param query: A query that want to filter before counting.
         """
         if not self.exists:
             return 0
 
-        rs: ObjectApiResponse = self.client.count(index=self.name)
+        rs: ObjectApiResponse = self.client.count(index=self.name, query=query)
         return rs['count']
 
     def get_mapping(
