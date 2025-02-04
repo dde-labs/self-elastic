@@ -211,7 +211,7 @@ def dump_delta_to_es(es: Es, metadata: Metadata, dev: bool = True):
     # NOTE: Extract data.
     lf: pl.LazyFrame = (
         pl.scan_delta(metadata.source)
-        .pipe(select_env, metadata, dev)
+        .pipe(select_env, metadata=metadata, dev_env_flag=dev)
     )
 
     success_total: int = 0
@@ -247,47 +247,24 @@ def dump_delta_to_es(es: Es, metadata: Metadata, dev: bool = True):
 
                 failed_total += num_failed
 
+        print(f"[INFO]: ... Mark slice: {success_total}")
+        time.sleep(20)
+
     print(success_total, failed_total)
 
-    # NOTE: Remove all data that does not dump
-    index: Index = es.index(name=metadata.index_nm)
-    index.refresh()
+    # NOTE: Remove all data that does not dump on the DEV
+    if dev:
+        index: Index = es.index(name=metadata.index_nm)
+        index.refresh()
 
-    rs = index.search_by_query(
-        query={
-            "bool": {
-                "must_not": [
-                    {
-                        "bool": {"filter":
-                            [
-                                {"term": {"@upload_prcs_nm": metadata.prcess_nm}},
-                                {"range": {"@upload_date": {
-                                    "gte": metadata.asat_dt_dash,
-                                    "lte": metadata.asat_dt_dash,
-                                    "format": "yyyy-MM-dd"
-                                }}},
-                            ],
-                        },
-                    },
-                ],
-            },
-        },
-        size=1000,
-    )
-    hits: list[Any] = rs.body['hits']['hits']
-    records: int = len(hits)
-    print(records)
-    if records > 0 and records != success_total:
-        print("Start delete doc that is not exists on the production.")
-        rs = index.delete_by_query(
+        rs = index.search_by_query(
             query={
                 "bool": {
                     "must_not": [
                         {
                             "bool": {"filter":
                                 [
-                                    {"term": {
-                                        "@upload_prcs_nm": metadata.prcess_nm}},
+                                    {"term": {"@upload_prcs_nm": metadata.prcess_nm}},
                                     {"range": {"@upload_date": {
                                         "gte": metadata.asat_dt_dash,
                                         "lte": metadata.asat_dt_dash,
@@ -299,5 +276,32 @@ def dump_delta_to_es(es: Es, metadata: Metadata, dev: bool = True):
                     ],
                 },
             },
+            size=1000,
         )
-        print("Delete docs successful with:", rs['deleted'])
+        hits: list[Any] = rs.body['hits']['hits']
+        records: int = len(hits)
+        print(records)
+        if records > 0 and records != success_total:
+            print("Start delete doc that is not exists on the production.")
+            rs = index.delete_by_query(
+                query={
+                    "bool": {
+                        "must_not": [
+                            {
+                                "bool": {"filter":
+                                    [
+                                        {"term": {
+                                            "@upload_prcs_nm": metadata.prcess_nm}},
+                                        {"range": {"@upload_date": {
+                                            "gte": metadata.asat_dt_dash,
+                                            "lte": metadata.asat_dt_dash,
+                                            "format": "yyyy-MM-dd"
+                                        }}},
+                                    ],
+                                },
+                            },
+                        ],
+                    },
+                },
+            )
+            print("Delete docs successful with:", rs['deleted'])

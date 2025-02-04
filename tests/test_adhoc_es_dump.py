@@ -1,10 +1,3 @@
-"""
-Example for running single test.
-
-```shell
-$ pytest -vv tests/test_adhoc_es_dump.py::test_es_dump_home_product -p no:faulthandler
-```
-"""
 import os
 from pathlib import Path
 from datetime import datetime
@@ -29,7 +22,11 @@ def container() -> str:
 
 
 def test_es_dump_home_product(es: Es, test_path: Path, st_name: str, container: str):
-    """pytest -vv tests/test_adhoc_es_dump.py::test_es_dump_home_product -p no:faulthandler"""
+    """Test Dump data from PROD to DEV on index, home-product.
+
+    CMD:
+    pytest -vv -s tests/test_adhoc_es_dump.py::test_es_dump_home_product -p no:faulthandler
+    """
 
     dest: Path = test_path.parent / f'data/dump/{datetime.now():%Y%m%d}'
     if dest.exists():

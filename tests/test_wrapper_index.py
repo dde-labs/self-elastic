@@ -173,11 +173,12 @@ def test_get_id(es: Es):
     # print(rs)
 
     index: Index = es.index(name='home-product')
-    rs = index.get_id('cc87dbcebfb02f17b539068b4df1e287')
+    # rs = index.get_id('cc87dbcebfb02f17b539068b4df1e287')
+    rs = index.get_id('c3c29cd38f49c799fc321ee71e6f2c26')
     rs_prepare = {
         r: rs['_source'][r]
         for r in rs['_source'] if r in (
-            'display_name_th', '@upload_date', '@upload_prcs_nm', '@delete_f'
+            'display_name_th', '@upload_date', '@upload_prcs_nm', '@deleted'
         )
     }
     print(rs_prepare)
