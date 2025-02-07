@@ -92,7 +92,11 @@ def test_es_dump_home_store(es: Es, test_path: Path, st_name: str, container: st
 
 
 def test_es_dump_home_solution(es: Es, test_path: Path, st_name: str, container: str):
-    """pytest -vv tests/test_adhoc_es_dump.py::test_es_dump_home_solution -p no:faulthandler"""
+    """Test Dump data from PROD to DEV on index, home-solution.
+
+    CMD:
+    pytest -vv -s tests/test_adhoc_es_dump.py::test_es_dump_home_solution -p no:faulthandler
+    """
     dest_name: str = 'home_solution'
     index_name: str = 'home-solution'
 
@@ -111,20 +115,21 @@ def test_es_dump_home_solution(es: Es, test_path: Path, st_name: str, container:
         )
 
     dump_delta_to_es(
-        es=es, metadata=Metadata(
+        es=es,
+        metadata=Metadata(
             source=str(dest / dest_name),
             index_nm=index_name,
             asat_dt=f"{datetime.now():%Y%m%d}",
             prcess_nm="P_CAP_ES_HOME_SOLUTION_D_10",
             limit_workers=3,
-        )
+        ),
     )
 
     index = es.index(index_name)
     index.refresh()
 
     rows: int = index.count()
-    print(rows)
+    print("Rows count from index:", rows)
 
 
 def test_es_dump_home_solution_provider(es: Es, test_path: Path, st_name: str, container: str):

@@ -137,6 +137,7 @@ class Index:
         query: dict[str, Any],
         output: str | Path = None,
         size: int = 1000,
+        **kwargs,
     ) -> ObjectApiResponse:
         """Search by query.
 
@@ -153,7 +154,7 @@ class Index:
             - `should` clauses are optional (or)
         """
         rs: ObjectApiResponse = self.client.search(
-            index=self.name, query=query, size=size
+            index=self.name, query=query, size=size, **kwargs
         )
         if output:
             with open(output, mode='w', encoding='utf-8') as f:

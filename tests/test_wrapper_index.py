@@ -57,8 +57,8 @@ def test_create_index(es: Es):
 
 
 def test_count(es: Es):
-    index: Index = es.index(name='home-product')
-    # index: Index = es.index(name='home-solution')
+    # index: Index = es.index(name='home-product')
+    index: Index = es.index(name='home-solution')
     rs: int = index.count()
     assert rs >= 0
     assert isinstance(rs, int)
@@ -91,6 +91,26 @@ def test_search_by_query(es: Es):
         }
         pprint(body, indent=2)
         print('-' * 100)
+
+
+def test_search_by_query_semantic(es: Es):
+    index = es.index(name='home-solution')
+    rs = index.search_by_query(
+        query={
+            "bool": {
+                "must": [
+                    {"match": {"@deleted": False}},
+                    {"semantic": {"field": "product_name_embed", "query": "มุ้งลวด"}},
+                ],
+                "should": [
+                    {"match": {"description.text": "มุ้งลวด"}},
+                ],
+            },
+        },
+        size=10,
+        _source=["product_name.text"],
+    )
+    print(rs)
 
 
 def test_search_by_query_multi_condition(es: Es):
