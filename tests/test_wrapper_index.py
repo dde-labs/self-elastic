@@ -194,7 +194,8 @@ def test_get_id(es: Es):
 
     index: Index = es.index(name='home-product')
     # rs = index.get_id('cc87dbcebfb02f17b539068b4df1e287')
-    rs = index.get_id('c3c29cd38f49c799fc321ee71e6f2c26')
+    # rs = index.get_id('c3c29cd38f49c799fc321ee71e6f2c26')
+    rs = index.get_id("43e967cb0e08b62ab66e5f5e71737dbc")
     rs_prepare = {
         r: rs['_source'][r]
         for r in rs['_source'] if r in (

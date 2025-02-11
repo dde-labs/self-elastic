@@ -1,5 +1,11 @@
 # Query
 
+A query mapping examples.
+
+```text
+
+```
+
 ```json
 {
     "filtered": {
@@ -15,6 +21,11 @@
     }
 }
 ```
+
+```text
+Cond 1 or Cond 2
+```
+
 ```json
 {
     "bool": {

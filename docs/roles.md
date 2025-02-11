@@ -9,12 +9,8 @@
     ],
     "indices": [
       {
-        "names": [
-          "ai-data-*"
-        ],
-        "privileges": [
-          "all"
-        ],
+        "names": ["ai-data-*"],
+        "privileges": ["all"],
         "allow_restricted_indices": false
       }
     ],
