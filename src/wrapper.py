@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -16,7 +17,7 @@ from elastic_transport import ListApiResponse, ObjectApiResponse
 
 from .exceptions import (
     ExceptionResult, BulkException, ResourceNotFoundException, IndexExists,
-    DocumentParsingException
+    DocumentParsingException, RateLimitException
 )
 
 
@@ -30,6 +31,19 @@ def extract_exception(exceptions: dict[str, Any]) -> None:
 
     elif rs.error['type'] == 'document_parsing_exception':
         raise DocumentParsingException(rs.error['reason'])
+
+    elif rs.error['type'] == 'exception':
+        if (
+            'caused_by' in rs.error
+            and all(s in rs.error['caused_by']['reason'] for s in (
+                'Received a rate limit status code',
+                'exceeded call rate limit',
+                'Please retry after',
+            ))
+        ):
+            raise RateLimitException(
+                rs.error['caused_by']['reason']
+            )
 
     raise BulkException(
         f"It has some error while bulk data to the elastic cloud: {exceptions}."

@@ -14,7 +14,8 @@ from azure.identity import InteractiveBrowserCredential
 from elasticsearch import helpers
 from elastic_transport import TlsError
 
-from ..wrapper import Es, Index
+from ..wrapper import Es, Index, extract_exception
+from ..exceptions import RateLimitException
 from .__conf import FRAMEWORK_SCD1_COLS, Metadata, DEFAULT_DT
 
 
@@ -78,7 +79,7 @@ def bulk_load_task(
     es: Es,
     request_timeout: int = 3800,
     retry_limit: int = 20,
-) -> tuple[int, list]:
+) -> tuple[int, list, pl.DataFrame]:
     """Bulk load task for chucking of dataframe that has size limit with the
     bulk function.
 
@@ -104,7 +105,7 @@ def bulk_load_task(
             print(
                 "issue dataframe that retry reach limit the maximum value."
             )
-            return 0, []
+            return 0, [], df
 
         first_bulk_flag: bool = False
 
@@ -123,9 +124,9 @@ def bulk_load_task(
             )
             print(
                 f"[INFO]: ... Loading to {index_name} with status success: "
-                f"{success} failed: {failed}"
+                f"{success} failed: {len(failed)}"
             )
-            return success, failed
+            return success, failed, df
 
         except helpers.BulkIndexError:
             retry_count += 1
@@ -205,6 +206,34 @@ def select_env(lf: pl.LazyFrame, metadata: Metadata, dev_env_flag: bool = True):
         )
 
 
+def retry_rate_limit(df: pl.DataFrame, es, index_nm) -> int:
+    total_rows: int = len(df)
+    total_success: int = 0
+    for frame in df.iter_slices(n_rows=int(total_rows / 3)):
+        print(
+            f"(00) Start running retry bulk load task ... ({len(df)})"
+        )
+        success, failed, df = bulk_load_task(
+            df=frame,
+            id_col='es_id',
+            index_name=index_nm,
+            es=es,
+        )
+        if len(failed) > 0:
+            raise NotImplementedError(
+                'retry rate limit do not help on this case'
+            )
+
+        total_success += success
+        time.sleep(15)
+
+    if total_success != total_rows:
+        raise ValueError(
+            "it have somthing wrong on retry rate limit."
+        )
+
+    return total_success
+
 
 def dump_delta_to_es(es: Es, metadata: Metadata, dev: bool = True):
 
@@ -237,18 +266,23 @@ def dump_delta_to_es(es: Es, metadata: Metadata, dev: bool = True):
                 time.sleep(5)
 
             for future in as_completed(futures):
-                success, failed = future.result()
+                success, failed, df = future.result()
 
                 success_total += success
 
                 if (num_failed := len(failed)) > 0:
-                    print(failed)
-                    break
+                    try:
+                        extract_exception(failed[0])
+                    except RateLimitException:
+                        success_total += retry_rate_limit(
+                            df, es=es, index_nm=metadata.index_nm
+                        )
+                        num_failed = 0
 
                 failed_total += num_failed
 
         print(f"[INFO]: ... Mark slice: {success_total}")
-        time.sleep(20)
+        time.sleep(25)
 
     print(success_total, failed_total)
 

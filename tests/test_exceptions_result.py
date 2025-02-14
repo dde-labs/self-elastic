@@ -27,6 +27,32 @@ def test_exception_result_500():
     print(except_rs)
 
 
+    except_rs = ExceptionResult(
+        **{
+            '_index': 'home-content-article',
+            '_id': 'b9228e0962a78b84f3d5d92f4faa000b',
+            'status': 500,
+            'error': {
+                'type': 'exception',
+                'reason': 'Exception when running inference id [home-text-embedding-3-small-chunk100] on field [content]',
+                'caused_by': {
+                    'type': 'status_exception',
+                    'reason': (
+                        'Received a rate limit status code. Remaining tokens '
+                        '[unknown]. Remaining requests [94]. for request from inference entity id '
+                        '[home-text-embedding-3-small-chunk100] status [429]. '
+                        'Error message: [Requests to the Embeddings_Create Operation under Azure OpenAI API version 2024-02-01 '
+                        'have exceeded call rate limit of your current OpenAI S0 pricing tier. '
+                        'Please retry after 86400 seconds. '
+                        'Please go here: https://aka.ms/oai/quotaincrease if '
+                        'you would like to further increase the default rate limit.]'
+                    ),
+                },
+            },
+        }
+    )
+    print(except_rs)
+
 def test_exception_result_404():
     except_rs = ExceptionResult(
         **{

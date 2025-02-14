@@ -60,7 +60,7 @@ def test_es_dump_home_product(es: Es, test_path: Path, st_name: str, container: 
 
 
 def test_es_dump_home_store(es: Es, test_path: Path, st_name: str, container: str):
-    """pytest -vv tests/test_adhoc_es_dump.py::test_es_dump_home_store -p no:faulthandler"""
+    """pytest -vv -s tests/test_adhoc_es_dump.py::test_es_dump_home_store -p no:faulthandler"""
     dest: Path = test_path.parent / f'data/dump/{datetime.now():%Y%m%d}'
     if dest.exists():
         dest.mkdir(exist_ok=True)
@@ -133,7 +133,10 @@ def test_es_dump_home_solution(es: Es, test_path: Path, st_name: str, container:
 
 
 def test_es_dump_home_solution_provider(es: Es, test_path: Path, st_name: str, container: str):
-    """pytest -vv tests/test_adhoc_es_dump.py::test_es_dump_home_solution_provider -p no:faulthandler"""
+    """
+    CMD:
+    pytest -vv -s tests/test_adhoc_es_dump.py::test_es_dump_home_solution_provider -p no:faulthandler
+    """
     dest_name: str = 'home_solution_provider'
     index_name: str = 'home-solution-provider'
 
@@ -169,7 +172,9 @@ def test_es_dump_home_solution_provider(es: Es, test_path: Path, st_name: str, c
 
 
 def test_es_dump_home_content_article(es: Es, test_path: Path, st_name: str, container: str):
-    """pytest -vv -s ./tests/test_adhoc_es_dump.py::test_es_dump_home_content_article
+    """
+    CMD:
+    pytest -vv -s ./tests/test_adhoc_es_dump.py::test_es_dump_home_content_article -p no:faulthandler
     """
     dest_name: str = 'home_content_article'
     index_name: str = 'home-content-article'
@@ -194,8 +199,8 @@ def test_es_dump_home_content_article(es: Es, test_path: Path, st_name: str, con
             index_nm=index_name,
             asat_dt=f"{datetime.now():%Y%m%d}",
             prcess_nm="P_CAP_ES_HOME_CONTENT_ARTICLE_D_10",
-            limit_rows=300,
-            limit_slice_rows=50,
+            limit_rows=100,
+            limit_slice_rows=20,
         )
     )
 
