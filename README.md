@@ -1,4 +1,4 @@
-# Self: Elasticsearch
+# Self: Elastic
 
 This project was created for testing feeding data from the structure object to
 the Elastic cloud that serving semi-structure object.
