@@ -86,7 +86,7 @@ def test_es_dump_home_solution(es: Es, test_path: Path, st_name: str, container:
             source=str(dest / 'home_solution'),
             index_nm='home-solution',
             asat_dt=f"{datetime.now():%Y%m%d}",
-            prcess_nm="P_CAP_ES_HOME_solution_D_10",
+            prcess_nm="P_CAP_ES_HOME_SOLUTION_D_10",
             limit_workers=3,
         ),
         dev=False,

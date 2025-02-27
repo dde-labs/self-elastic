@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from pprint import pprint
 from typing import Any
@@ -66,9 +67,8 @@ def test_count(es: Es):
 
 
 def test_truncate(es: Es):
-    index: Index = es.index('tmp-korawica-home-product')
+    index: Index = es.index(name='home-solution')
     rs = index.truncate(auto_refresh=True)
-    print(type(rs))
     print(rs)
 
 
@@ -212,3 +212,7 @@ def test_get_id_solution(es: Es):
         )
     }
     print(rs_prepare)
+    with open(
+        './b13a599ff10ec5acbf93f66207cdb12a.json', mode='w', encoding='utf-8'
+    ) as f:
+        json.dump(rs['_source'], f, indent=4)
