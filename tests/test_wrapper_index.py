@@ -188,10 +188,6 @@ def test_delete_by_query(es: Es):
 
 
 def test_get_id(es: Es):
-    # index: Index = es.index(name='home-solution')
-    # rs = index.get_id('2f06e2ffc54234439bbed00ce84d265a')
-    # print(rs)
-
     index: Index = es.index(name='home-product')
     # rs = index.get_id('cc87dbcebfb02f17b539068b4df1e287')
     # rs = index.get_id('c3c29cd38f49c799fc321ee71e6f2c26')
@@ -200,6 +196,19 @@ def test_get_id(es: Es):
         r: rs['_source'][r]
         for r in rs['_source'] if r in (
             'display_name_th', '@upload_date', '@upload_prcs_nm', '@deleted'
+        )
+    }
+    print(rs_prepare)
+
+
+def test_get_id_solution(es: Es):
+    index: Index = es.index(name='home-solution')
+    # rs = index.get_id('2f06e2ffc54234439bbed00ce84d265a')
+    rs = index.get_id("b13a599ff10ec5acbf93f66207cdb12a")
+    rs_prepare = {
+        r: rs['_source'][r]
+        for r in rs['_source'] if r in (
+            'product_name', '@upload_date', '@upload_prcs_nm', '@deleted'
         )
     }
     print(rs_prepare)
