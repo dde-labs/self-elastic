@@ -12,7 +12,8 @@ def test_cat_health(es: Es):
 
 
 def test_indices(es: Es):
-    rs = es.indices('home-*', verbose=True)
+    rs = es.indices('*', verbose=True)
+    # rs = es.indices('home-*', verbose=True)
     print(type(rs))
     for r in rs.body:
         print(r)

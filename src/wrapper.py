@@ -127,6 +127,12 @@ class Index:
             json.dump(rs.body, f, indent=4)
         return rs
 
+    def put_setting(self, setting: dict[str, Any], **kwargs):
+        rs = self.client.indices.put_settings(
+            index=self.name, settings=setting, **kwargs
+        )
+        return rs
+
     def refresh(self) -> None:
         """Refresh this index."""
         self.client.indices.refresh(index=self.name)
