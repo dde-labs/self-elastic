@@ -8,15 +8,20 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime
+
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import Any
 
 from elasticsearch import Elasticsearch, helpers
 from elastic_transport import ListApiResponse, ObjectApiResponse
 
 from .exceptions import (
     ExceptionResult, BulkException, ResourceNotFoundException, IndexExists,
-    DocumentParsingException, RateLimitException
+    DocumentParsingException, RateLimitException,
+)
+from .schemas import (
+    SynonymGetResp, SynonymPutResp, SynonymDeleteResp, SynonymRuleGetResp,
+    SynonymRulePutResp, SynonymRuleDeleteResp,
 )
 
 
@@ -246,56 +251,53 @@ class Index:
         return success
 
 
-class SynonymSetData(TypedDict):
-    id: str | None
-    synonyms: str
-
-
 class Synonym:
 
     def __init__(self, client: Elasticsearch, name: str):
         self.client: Elasticsearch = client
         self.name = name
 
-    def get(self):
-        resp = self.client.synonyms.get_synonym(
+    def get(self) -> SynonymGetResp:
+        resp: ObjectApiResponse = self.client.synonyms.get_synonym(
             id=self.name,
         )
-        return resp
+        return SynonymGetResp(**resp.body)
 
-    def put(self, synonyms_set: list[SynonymSetData]):
-        return self.client.synonyms.put_synonym(
+    def put(self, synonyms_set: list[dict]) -> SynonymPutResp:
+        resp: ObjectApiResponse = self.client.synonyms.put_synonym(
             id=self.name,
             synonyms_set=synonyms_set
         )
+        return SynonymPutResp(**resp.body)
 
-    def delete(self):
-        resp = self.client.synonyms.delete_synonym(
+
+    def delete(self) -> SynonymDeleteResp:
+        resp: ObjectApiResponse = self.client.synonyms.delete_synonym(
             id=self.name,
         )
-        return resp
+        return SynonymDeleteResp(**resp.body)
 
-    def get_rule(self, rule_id: str):
-        resp = self.client.synonyms.get_synonym_rule(
+    def get_rule(self, rule_id: str) -> SynonymRuleGetResp:
+        resp: ObjectApiResponse = self.client.synonyms.get_synonym_rule(
             set_id=self.name,
             rule_id=rule_id,
         )
-        return resp
+        return SynonymRuleGetResp(**resp.body)
 
-    def put_rule(self, rule_id: str, synonyms: str):
-        resp = self.client.synonyms.put_synonym_rule(
+    def put_rule(self, rule_id: str, synonyms: str) -> SynonymRulePutResp:
+        resp: ObjectApiResponse = self.client.synonyms.put_synonym_rule(
             set_id=self.name,
             rule_id=rule_id,
             synonyms=synonyms,
         )
-        return resp
+        return SynonymRulePutResp(**resp.body)
 
-    def delete_rule(self, rule_id: str):
-        resp = self.client.synonyms.delete_synonym_rule(
+    def delete_rule(self, rule_id: str) -> SynonymRuleDeleteResp:
+        resp: ObjectApiResponse = self.client.synonyms.delete_synonym_rule(
             set_id=self.name,
             rule_id=rule_id,
         )
-        return resp
+        return SynonymRuleDeleteResp(**resp.body)
 
 
 class Es:
