@@ -7,10 +7,9 @@ from __future__ import annotations
 
 import json
 import logging
-import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 from elasticsearch import Elasticsearch, helpers
 from elastic_transport import ListApiResponse, ObjectApiResponse
@@ -247,6 +246,58 @@ class Index:
         return success
 
 
+class SynonymSetData(TypedDict):
+    id: str | None
+    synonyms: str
+
+
+class Synonym:
+
+    def __init__(self, client: Elasticsearch, name: str):
+        self.client: Elasticsearch = client
+        self.name = name
+
+    def get(self):
+        resp = self.client.synonyms.get_synonym(
+            id=self.name,
+        )
+        return resp
+
+    def put(self, synonyms_set: list[SynonymSetData]):
+        return self.client.synonyms.put_synonym(
+            id=self.name,
+            synonyms_set=synonyms_set
+        )
+
+    def delete(self):
+        resp = self.client.synonyms.delete_synonym(
+            id=self.name,
+        )
+        return resp
+
+    def get_rule(self, rule_id: str):
+        resp = self.client.synonyms.get_synonym_rule(
+            set_id=self.name,
+            rule_id=rule_id,
+        )
+        return resp
+
+    def put_rule(self, rule_id: str, synonyms: str):
+        resp = self.client.synonyms.put_synonym_rule(
+            set_id=self.name,
+            rule_id=rule_id,
+            synonyms=synonyms,
+        )
+        return resp
+
+    def delete_rule(self, rule_id: str):
+        resp = self.client.synonyms.delete_synonym_rule(
+            set_id=self.name,
+            rule_id=rule_id,
+        )
+        return resp
+
+
 class Es:
     """Elastic cloud interface object."""
 
@@ -284,3 +335,14 @@ class Es:
         :return:
         """
         return Index(self.client, name=name)
+
+    def list_synonyms(self):
+        return self.client.synonyms.get_synonyms_sets()
+
+
+    def synonym(self, name) -> Synonym:
+        """Get synonym interface object.
+
+        :param name: A synonym ID.
+        """
+        return Synonym(self.client, name=name)

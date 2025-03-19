@@ -1,0 +1,297 @@
+{
+  "mappings": {
+    "properties": {
+      "display_name_th": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "normalizer": "lowercase_normalizer"
+          },
+          "n4gram": {
+            "type": "text",
+            "analyzer": "n4gram"
+          },
+          "n5gram": {
+            "type": "text",
+            "analyzer": "n5gram"
+          },
+          "shingle": {
+            "type": "text",
+            "analyzer": "icu_shingle_analyzer"
+          },
+          "trigram": {
+            "type": "text",
+            "analyzer": "ngram"
+          }
+        },
+        "analyzer": "index_synonym_analyzer",
+        "search_analyzer": "search_synonym_analyzer"
+      },
+      "display_name_en": {
+        "type": "text",
+        "analyzer": "icu_analyzer"
+      },
+      "short_description": {
+        "type": "semantic_text",
+        "inference_id": "home-text-embedding-3-small-chunk300",
+        "model_settings": {
+          "task_type": "text_embedding",
+          "dimensions": 1536,
+          "similarity": "cosine",
+          "element_type": "float"
+        }
+      },
+      "basic_data": {
+        "type": "text",
+        "analyzer": "icu_analyzer"
+      },
+      "b2c_selling_point": {
+        "type": "text",
+        "analyzer": "icu_analyzer"
+      },
+      "weight_number": {
+        "type": "float"
+      },
+      "weight_unit": {
+        "type": "keyword"
+      },
+      "material": {
+        "type": "text",
+        "analyzer": "icu_analyzer"
+      },
+      "installation_tips": {
+        "type": "text",
+        "analyzer": "icu_analyzer"
+      },
+      "usage_tips": {
+        "type": "text",
+        "analyzer": "icu_analyzer"
+      },
+      "care_warning_instruction": {
+        "type": "text",
+        "analyzer": "icu_analyzer"
+      },
+      "standard_list": {
+        "type": "text",
+        "analyzer": "icu_analyzer"
+      },
+      "warranty_description": {
+        "type": "text",
+        "analyzer": "icu_analyzer"
+      },
+      "group_name": {
+        "type": "text",
+        "analyzer": "icu_analyzer"
+      },
+      "width_number": {
+        "type": "float"
+      },
+      "width_unit": {
+        "type": "keyword"
+      },
+      "length_number": {
+        "type": "float"
+      },
+      "length_unit": {
+        "type": "keyword"
+      },
+      "height_number": {
+        "type": "float"
+      },
+      "height_unit": {
+        "type": "keyword"
+      },
+      "brand": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "analyzer": "icu_analyzer"
+      },
+      "color": {
+        "type": "text",
+        "analyzer": "icu_analyzer"
+      },
+      "cms_id": {
+        "type": "keyword"
+      },
+      "barcode": {
+        "type": "keyword"
+      },
+      "article_id": {
+        "type": "integer"
+      },
+      "concat_display_name": {
+        "type": "semantic_text",
+        "inference_id": "home-text-embedding-3-small-chunk300",
+        "model_settings": {
+          "task_type": "text_embedding",
+          "dimensions": 1536,
+          "similarity": "cosine",
+          "element_type": "float"
+        }
+      },
+      "home_id": {
+        "type": "keyword"
+      },
+      "mat_no": {
+        "type": "keyword"
+      },
+      "sap_id": {
+        "type": "keyword"
+      },
+      "product_image": {
+        "type": "keyword"
+      },
+      "product_applications": {
+        "properties": {
+          "Application_Type": {
+            "type": "keyword"
+          },
+          "Image": {
+            "type": "keyword"
+          },
+          "PDF": {
+            "type": "keyword"
+          }
+        }
+      },
+      "keyword": {
+        "type": "keyword"
+      },
+      "@upload_prcs_nm": {
+        "type": "keyword"
+      },
+      "@upload_date": {
+        "type": "date"
+      },
+      "@deleted": {
+        "type": "boolean"
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "filter": {
+        "split_number_filter": {
+          "type": "word_delimiter",
+          "split_on_numerics": "true",
+          "catenate_words": "true"
+        },
+        "shingle_filter": {
+          "max_shingle_size": "3",
+          "min_shingle_size": "2",
+          "output_unigrams": "true",
+          "type": "shingle",
+          "separator": ""
+        },
+        "index_synonym_filter": {
+          "type": "synonym_graph",
+          "synonyms": [
+            "q-chang, คิวช่าง",
+            "ฉนวนกันความร้อน, สเตคูล",
+            "ฉนวนกันความร้อน, stay cool",
+            "cotto, คอตโต้",
+            "ไม้ฝา, สมาร์ทวูด",
+            "smart wood, สมาร์ทวูด",
+            "smartwood, สมาร์ทวูด",
+            "สมาร์ทบอร์ด, smart board",
+            "สมาร์ทบอร์ด, smartboard",
+            "cpac, ซีแพค",
+            "เครื่องเจียร, ลูกหมู",
+            "ฟิล์ม, ฟิม",
+            "ฟิล์ม, ฟีม",
+            "ลามิเนต, laminate",
+            "ไวนิล, vinyl",
+            "มอร์ตาร์, mortar",
+            "มอร์ตาร์, มอต้า",
+            "ปูนงานโครงสร้าง, ปูนช้างแดง",
+            "ปูนงานโครงสร้าง, ปูนแดง",
+            "ปููนซีเมนต์ผสม, ปูนเขียว",
+            "พีวีซี, pvc",
+            "toa, ทีโอเอ"
+          ]
+        },
+        "search_synonym_filter": {
+          "type": "synonym_graph",
+          "synonyms_set": "home-product-synonym",
+          "updateable": true,
+          "expand": true
+        }
+      },
+      "normalizer": {
+        "lowercase_normalizer": {
+          "filter": [
+            "lowercase"
+          ],
+          "type": "custom"
+        }
+      },
+      "analyzer": {
+        "ngram": {
+          "filter": "lowercase",
+          "tokenizer": "trigram"
+        },
+        "icu_analyzer": {
+          "filter": [
+            "split_number_filter",
+            "lowercase"
+          ],
+          "tokenizer": "icu_tokenizer"
+        },
+        "icu_shingle_analyzer": {
+          "filter": [
+            "split_number_filter",
+            "lowercase",
+            "shingle_filter"
+          ],
+          "tokenizer": "thai"
+        },
+        "n4gram": {
+          "filter": "lowercase",
+          "tokenizer": "n4gram"
+        },
+        "n5gram": {
+          "filter": "lowercase",
+          "tokenizer": "n5gram"
+        },
+        "index_synonym_analyzer": {
+          "type": "custom",
+          "tokenizer": "thai",
+          "filter": [
+            "lowercase",
+            "index_synonym_filter"
+            ]
+        },
+        "search_synonym_analyzer": {
+          "type": "custom",
+          "tokenizer": "thai",
+          "filter": [
+            "lowercase",
+            "search_synonym_filter"
+            ]
+        }
+      },
+      "tokenizer": {
+        "trigram": {
+          "type": "ngram",
+          "min_gram": "3",
+          "max_gram": "3"
+        },
+         "n4gram": {
+          "type": "ngram",
+          "min_gram": "4",
+          "max_gram": "4"
+        },
+        "n5gram": {
+          "type": "ngram",
+          "min_gram": "5",
+          "max_gram": "5"
+        }
+      }
+    }
+  }
+}

@@ -9,8 +9,8 @@ import xml.etree.ElementTree as ET
 from xml.etree.ElementTree import Element
 from typing import Optional
 
-from .__types import AnyPath
-from .utils import IMAGE_EXT, is_image
+from src.__types import AnyPath
+from src.utils import IMAGE_EXT, is_image
 
 
 NAMESPACE_MAP: dict[str, str] = {

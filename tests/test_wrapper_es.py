@@ -16,3 +16,9 @@ def test_indices(es: Es):
     print(type(rs))
     for r in rs.body:
         print(r)
+
+
+def test_list_synonyms(es: Es):
+    rs = es.list_synonyms()
+    print(type(rs))
+    print(rs)

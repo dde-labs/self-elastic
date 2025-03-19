@@ -1,4 +1,4 @@
-from src.extract_docx import (
+from src.extract.extract_docx import (
     extract_docx2xlm, extract_docx2images, extract_docx2txt
 )
 

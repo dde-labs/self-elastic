@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from markitdown import MarkItDown
 
-from .__types import AnyPathOrNone
+from src.__types import AnyPathOrNone
 
 
 def extract_all2markdown(file: str, target: AnyPathOrNone = None) -> None:

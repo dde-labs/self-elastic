@@ -1,6 +1,4 @@
-from pathlib import Path
-
-from src.extract import extract_all2markdown
+from src.extract.extract import extract_all2markdown
 from memory_profiler import profile
 
 
