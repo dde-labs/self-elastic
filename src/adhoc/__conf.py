@@ -23,6 +23,7 @@ class Metadata:
     index_nm: str
     asat_dt: str
     prcess_nm: str
+    where_cond: str | None = field(default=None)
     limit_rows: int = field(default=750)
     limit_workers: int = field(default=1)
     limit_slice_rows: int = field(default=250)
